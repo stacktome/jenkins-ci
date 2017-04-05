@@ -1,0 +1,40 @@
+podTemplate(label: 'mypod', containers: [
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave', alwaysPullImage: true),
+    containerTemplate(name: 'sbt', image: 'hseeberger/scala-sbt', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
+  ], volumes: [
+    hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker'),
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+  ]
+) {
+
+    node ('mypod') {
+        stage 'Get code'
+        git 'git@github.com:fuzzylabs/clickstream-pipeline.git'
+        container('sbt') {
+            stage 'Fetch dependencies and compile'
+            sh 'sbt customEnrich/compile'
+          
+            stage 'Run unittests'
+            sh 'sbt customEnrich/test'
+            
+            stage 'Build docker image'
+            sh 'sbt customEnrich/docker:publishLocal'
+        }
+        container('cloud-sdk') {
+            stage 'Push docker image to registry'
+            sh "gcloud docker -- tag eu.gcr.io/fuzzylabs-1314/custom-enrich:v0.0.1 eu.gcr.io/fuzzylabs-1314/custom-enrich:latest"
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/custom-enrich:v0.0.1'
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/custom-enrich:latest'
+            
+            sh 'gcloud config set compute/zone europe-west1-d'
+            sh 'gcloud container clusters get-credentials clickstream-pipeline'
+        }
+        container('kubectl') {
+            stage "Deploy to production"
+            sh 'kubectl config get-contexts'
+            sh 'kubectl config current-context'
+        }
+    }
+}

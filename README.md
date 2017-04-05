@@ -16,7 +16,7 @@ gcloud compute firewall-rules create jenkins-fw-ext --network jenkins --allow tc
 
 Create cluster:
 ```
-gcloud container clusters create jenkins-cd -z europe-west1-d --network jenkins --scopes "storage-rw"
+gcloud container clusters create jenkins-cd -z europe-west1-d --network jenkins --scopes "storage-rw,cloud-platform" --num-nodes=3
 ```
 
 Provision persistent disk:
