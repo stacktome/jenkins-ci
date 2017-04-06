@@ -1,5 +1,5 @@
 podTemplate(label: 'mypod', containers: [
-    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave'),
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave-rec-service'),
     containerTemplate(name: 'sbt', image: 'hseeberger/scala-sbt', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
@@ -16,35 +16,32 @@ podTemplate(label: 'mypod', containers: [
         try {
         
         stage 'Get code'
-        git 'git@github.com:fuzzylabs/clickstream-pipeline.git'
+        git 'git@github.com:fuzzylabs/recommendation-service.git'
         sh 'git checkout $BRANCH'
         sh "git show -s --format=%H > /tmp/shared/commit-digest"
         container('sbt') {
-            stage 'Fetch dependencies and compile'
-            sh 'sbt customEnrich/compile'
-            
-            stage 'Run unittests'
-            sh 'sbt customEnrich/test'
+            stage 'Run unit tests'
+            sh 'sbt test'
             
             stage 'Build docker image'
-            sh 'sbt customEnrich/docker:publishLocal'
+            sh 'sbt docker:publishLocal'
             
-            sh "sbt -no-colors customEnrich/version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
+            sh "sbt -no-colors version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
         }
         container('cloud-sdk') {
             stage 'Push docker image to registry'
-            sh "gcloud docker -- tag eu.gcr.io/fuzzylabs-1314/custom-enrich:v`cat /tmp/shared/project-version` eu.gcr.io/fuzzylabs-1314/custom-enrich:`cat /tmp/shared/commit-digest`"
-            sh "gcloud docker -- tag eu.gcr.io/fuzzylabs-1314/custom-enrich:v`cat /tmp/shared/project-version` eu.gcr.io/fuzzylabs-1314/custom-enrich:latest"
-            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/custom-enrich:v`cat /tmp/shared/project-version`'
-            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/custom-enrich:`cat /tmp/shared/commit-digest`'
-            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/custom-enrich:latest'
+            sh "gcloud docker -- tag eu.gcr.io/fuzzylabs-1314/rec-service-image:v`cat /tmp/shared/project-version` eu.gcr.io/fuzzylabs-1314/rec-service-image:`cat /tmp/shared/commit-digest`"
+            sh "gcloud docker -- tag eu.gcr.io/fuzzylabs-1314/rec-service-image:v`cat /tmp/shared/project-version` eu.gcr.io/fuzzylabs-1314/rec-service-image:latest"
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/rec-service-image:v`cat /tmp/shared/project-version`'
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/rec-service-image:`cat /tmp/shared/commit-digest`'
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/rec-service-image:latest'
             sh 'gcloud config set compute/zone europe-west1-d'
-            sh 'gcloud container clusters get-credentials clickstream-pipeline'
+            sh 'gcloud container clusters get-credentials rec-service-cluster'
         }
         container('kubectl') {
             stage "Deploy to production"
-            sh 'sed -i "s/latest/`cat /tmp/shared/commit-digest`/g" k8s/custom-enrich-controller.yaml'
-            sh 'kubectl replace -f k8s/custom-enrich-controller.yaml --force --cascade --record'
+            sh 'sed -i "s/latest/`cat /tmp/shared/commit-digest`/g" kubectl-deployment.yaml'
+            sh 'kubectl replace -f kubectl-deployment.yaml --force --cascade --record'
         }
         
         } catch(exc) {

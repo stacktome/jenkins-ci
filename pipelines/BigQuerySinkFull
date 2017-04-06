@@ -1,5 +1,5 @@
 podTemplate(label: 'mypod', containers: [
-    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave', alwaysPullImage: true),
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave'),
     containerTemplate(name: 'sbt', image: 'hseeberger/scala-sbt', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
