@@ -1,0 +1,56 @@
+podTemplate(label: 'mypod', containers: [
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave', alwaysPullImage: true),
+    containerTemplate(name: 'sbt', image: 'hseeberger/scala-sbt', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
+  ], volumes: [
+    emptyDirVolume(mountPath: '/tmp/shared', memory: false),
+    hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker'),
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+  ]
+) {
+    slackSend color: 'good', message: "Build scheduled: ${env.BUILD_URL} (branch=$BRANCH)"
+    node ('mypod') {
+        
+        try {
+            
+        stage 'Get code'
+        git 'git@github.com:fuzzylabs/clickstream-pipeline.git'
+        sh 'git checkout $BRANCH'
+        sh "git show -s --format=%H > /tmp/shared/commit-digest"
+        container('sbt') {
+            stage 'Fetch dependencies and compile'
+            sh 'sbt kafkaToBigquery/compile'
+            
+            stage 'Run unittests'
+            sh 'sbt kafkaToBigquery/test'
+            
+            stage 'Build docker image'
+            sh 'sbt kafkaToBigquery/docker:publishLocal'
+            
+            sh "sbt -no-colors kafkaToBigquery/version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
+        }
+        container('cloud-sdk') {
+            stage 'Push docker image to registry'
+            sh "gcloud docker -- tag eu.gcr.io/fuzzylabs-1314/kafka-to-bigquery:v`cat /tmp/shared/project-version` eu.gcr.io/fuzzylabs-1314/kafka-to-bigquery:`cat /tmp/shared/commit-digest`"
+            sh "gcloud docker -- tag eu.gcr.io/fuzzylabs-1314/kafka-to-bigquery:v`cat /tmp/shared/project-version` eu.gcr.io/fuzzylabs-1314/kafka-to-bigquery:latest"
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/kafka-to-bigquery:v`cat /tmp/shared/project-version`'
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/kafka-to-bigquery:`cat /tmp/shared/commit-digest`'
+            sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/kafka-to-bigquery:latest'
+            sh 'gcloud config set compute/zone europe-west1-d'
+            sh 'gcloud container clusters get-credentials clickstream-pipeline'
+        }
+        container('kubectl') {
+            stage "Deploy to production"
+            sh 'sed -i "s/latest/`cat /tmp/shared/commit-digest`/g" k8s/custom-enrich-controller.yaml'
+            sh 'kubectl replace -f k8s/kafka-connect-controller.yaml --force --cascade --record'
+        }
+        
+        } catch(exc) {
+            slackSend color: 'danger', message: "Build failed: ${env.BUILD_URL}"
+            throw exc
+        }
+        
+        slackSend color: 'good', message: "Build completed: ${env.BUILD_URL}"
+    }
+}

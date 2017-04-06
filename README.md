@@ -41,5 +41,8 @@ kubectl exec <pod name> --namespace jenkins -- cat /var/jenkins_home/secrets/ini
 
 Make sure to "enable proxy compatibility" in Manage Jenkins → Configure Global Security → Crumbs Algortithm
 
-Install and configure kubernetes plugin
+Install and configure Kubernetes plugin
 https://cloud.google.com/solutions/configuring-jenkins-container-engine
+
+Install and configure Slack plugin
+https://github.com/jenkinsci/slack-plugin
