@@ -55,6 +55,6 @@ https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin
 
 Invent and add build token(s) to all build jobs in Configure → Build Triggers → Trigger builds remotely
 
-Go to target repo page on Github, in Settings → Webhooks set `Payload URL` to `http://jenkins.fuzzylabsresearch.com:8000/?token=<token>&build=<build name>` where `<token>` is the token you have set in jenkins (make sure it does not contain "+", "?" or other confusing characters), `<build name>`is a name of a pipeline in Jenkins that you want the webhook to trigger.
+Go to target repo page on Github, in Settings → Webhooks set `Payload URL` to `http://jenkins.fuzzylabsresearch.com:8000/?token=<token>&build=<build name>` where `<token>` is the token you have set in jenkins (make sure it does not contain "+", "?" or other confusing characters), `<build name>`is a name of a pipeline in Jenkins that you want the webhook to trigger. Select "Let me select individual events." and tick "Pull request".
 
 Now all merged pull requests into master will automatically trigger builds in Jenkins.
