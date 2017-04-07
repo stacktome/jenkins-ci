@@ -46,3 +46,15 @@ https://cloud.google.com/solutions/configuring-jenkins-container-engine
 
 Install and configure Slack plugin
 https://github.com/jenkinsci/slack-plugin
+
+
+#### Configure build on merge to master on Github
+
+Install and configure Build Token Root Plugin
+https://wiki.jenkins-ci.org/display/JENKINS/Build+Token+Root+Plugin
+
+Invent and add build token(s) to all build jobs in Configure → Build Triggers → Trigger builds remotely
+
+Go to target repo page on Github, in Settings → Webhooks set `Payload URL` to `http://jenkins.fuzzylabsresearch.com:8000/?token=<token>&build=<build name>` where `<token>` is the token you have set in jenkins (make sure it does not contain "+", "?" or other confusing characters), `<build name>`is a name of a pipeline in Jenkins that you want the webhook to trigger.
+
+Now all merged pull requests into master will automatically trigger builds in Jenkins.

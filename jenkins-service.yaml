@@ -15,6 +15,10 @@
         port: 80
         targetPort: 8080
         name: ui
+      - protocol: TCP
+        port: 8000
+        targetPort: 8000
+        name: webhooks
 ---
   kind: Service
   apiVersion: v1
