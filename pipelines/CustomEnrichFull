@@ -21,13 +21,13 @@ podTemplate(label: 'mypod', containers: [
         sh "git show -s --format=%H > /tmp/shared/commit-digest"
         container('sbt') {
             stage 'Fetch dependencies and compile'
-            sh 'sbt customEnrich/compile'
+            sh 'sbt -no-colors customEnrich/compile'
             
             stage 'Run unittests'
-            sh 'sbt customEnrich/test'
+            sh 'sbt -no-colors customEnrich/test'
             
             stage 'Build docker image'
-            sh 'sbt customEnrich/docker:publishLocal'
+            sh 'sbt -no-colors customEnrich/docker:publishLocal'
             
             sh "sbt -no-colors customEnrich/version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
         }

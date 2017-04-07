@@ -21,10 +21,10 @@ podTemplate(label: 'mypod', containers: [
         sh "git show -s --format=%H > /tmp/shared/commit-digest"
         container('sbt') {
             stage 'Run unit tests'
-            sh 'sbt test'
+            sh 'sbt -no-colors test'
             
             stage 'Build docker image'
-            sh 'sbt docker:publishLocal'
+            sh 'sbt -no-colors docker:publishLocal'
             
             sh "sbt -no-colors version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
         }

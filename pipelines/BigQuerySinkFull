@@ -20,13 +20,13 @@ podTemplate(label: 'mypod', containers: [
         sh "git show -s --format=%H > /tmp/shared/commit-digest"
         container('sbt') {
             stage 'Fetch dependencies and compile'
-            sh 'sbt kafkaToBigquery/compile'
+            sh 'sbt -no-colors kafkaToBigquery/compile'
             
             stage 'Run unittests'
-            sh 'sbt kafkaToBigquery/test'
+            sh 'sbt -no-colors kafkaToBigquery/test'
             
             stage 'Build docker image'
-            sh 'sbt kafkaToBigquery/docker:publishLocal'
+            sh 'sbt -no-colors kafkaToBigquery/docker:publishLocal'
             
             sh "sbt -no-colors kafkaToBigquery/version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
         }
