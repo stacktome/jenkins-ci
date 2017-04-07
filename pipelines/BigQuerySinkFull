@@ -42,7 +42,7 @@ podTemplate(label: 'mypod', containers: [
         }
         container('kubectl') {
             stage "Deploy to production"
-            sh 'sed -i "s/latest/`cat /tmp/shared/commit-digest`/g" k8s/custom-enrich-controller.yaml'
+            sh 'sed -i "s/latest/`cat /tmp/shared/commit-digest`/g" k8s/kafka-connect-controller.yaml'
             sh 'kubectl replace -f k8s/kafka-connect-controller.yaml --force --cascade --record'
         }
         
