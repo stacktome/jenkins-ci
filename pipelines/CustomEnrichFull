@@ -16,8 +16,7 @@ podTemplate(label: 'mypod', containers: [
         try {
         
         stage 'Get code'
-        git 'git@github.com:fuzzylabs/clickstream-pipeline.git'
-        sh 'git checkout $BRANCH'
+        git url: 'git@github.com:fuzzylabs/clickstream-pipeline.git', branch: '$BRANCH'
         sh "git show -s --format=%H > /tmp/shared/commit-digest"
         container('sbt') {
             stage 'Fetch dependencies and compile'
