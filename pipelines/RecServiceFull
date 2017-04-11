@@ -1,5 +1,5 @@
 podTemplate(label: 'mypod', containers: [
-    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave-rec-service'),
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave-rec-service', alwaysPullImage: true),
     containerTemplate(name: 'sbt', image: 'hseeberger/scala-sbt', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
@@ -40,7 +40,7 @@ podTemplate(label: 'mypod', containers: [
         }
         container('kubectl') {
             stage "Deploy to production"
-            sh 'sed -i "s/latest/`cat /tmp/shared/commit-digest`/g" kubectl-deployment.yaml'
+            sh 'sed -i "s/v`cat /tmp/shared/project-version`/`cat /tmp/shared/commit-digest`/g" kubectl-deployment.yaml'
             sh 'kubectl replace -f kubectl-deployment.yaml --force --cascade --record'
         }
         
