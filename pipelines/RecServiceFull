@@ -1,10 +1,11 @@
 podTemplate(label: 'mypod', containers: [
-    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave-rec-service', alwaysPullImage: true),
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave-rec-service'),
     containerTemplate(name: 'sbt', image: 'hseeberger/scala-sbt', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
   ], volumes: [
     emptyDirVolume(mountPath: '/tmp/shared', memory: false),
+    hostPathVolume(mountPath: '/home/jenkins/ivy-cache', hostPath: '/tmp/build-ivy-cache'),
     hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker'),
     hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
   ]
@@ -19,11 +20,12 @@ podTemplate(label: 'mypod', containers: [
         git url: 'git@github.com:fuzzylabs/recommendation-service.git', branch: '$BRANCH'
         sh "git show -s --format=%H > /tmp/shared/commit-digest"
         container('sbt') {
-            stage 'Run unit tests'
-            sh 'sbt -no-colors test'
-            
             stage 'Build docker image'
-            sh 'sbt -no-colors docker:publishLocal'
+            
+            sh "mkdir -p /home/jenkins/ivy-cache/${env.JOB_NAME}"
+            sh "printf \"\n-ivy /home/jenkins/ivy-cache/${env.JOB_NAME}\n-no-colors\" > .sbtopts"
+            
+            sh 'sbt -no-colors test docker:publishLocal'
             
             sh "sbt -no-colors version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
         }

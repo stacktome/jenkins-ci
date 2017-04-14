@@ -5,6 +5,7 @@ podTemplate(label: 'mypod', containers: [
     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', ttyEnabled: true, command: 'cat')
   ], volumes: [
     emptyDirVolume(mountPath: '/tmp/shared', memory: false),
+    hostPathVolume(mountPath: '/home/jenkins/ivy-cache', hostPath: '/tmp/build-ivy-cache'),
     hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker'),
     hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
   ]
@@ -19,14 +20,12 @@ podTemplate(label: 'mypod', containers: [
         git url: 'git@github.com:fuzzylabs/clickstream-pipeline.git', branch: '$BRANCH'
         sh "git show -s --format=%H > /tmp/shared/commit-digest"
         container('sbt') {
-            stage 'Fetch dependencies and compile'
-            sh 'sbt -no-colors customEnrich/compile'
-            
-            stage 'Run unittests'
-            sh 'sbt -no-colors customEnrich/test'
-            
             stage 'Build docker image'
-            sh 'sbt -no-colors customEnrich/docker:publishLocal'
+            
+            sh "mkdir -p /home/jenkins/ivy-cache/${env.JOB_NAME}"
+            sh "printf \"\n-ivy /home/jenkins/ivy-cache/${env.JOB_NAME}\n-no-colors\" > .sbtopts"
+
+            sh 'sbt -no-colors customEnrich/test customEnrich/docker:publishLocal'
             
             sh "sbt -no-colors customEnrich/version | tail -n 1 | awk '{print \$2}' > /tmp/shared/project-version"
         }
