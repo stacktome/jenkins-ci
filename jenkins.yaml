@@ -14,12 +14,12 @@ spec:
       - name: master
         image: jenkins:2.7.4
         ports:
-        - containerPort: 8080
+        - containerPort: 80
         - containerPort: 50000
         readinessProbe:
           httpGet:
             path: /login
-            port: 8080
+            port: 80
           periodSeconds: 10
           timeoutSeconds: 5
           successThreshold: 2
@@ -28,10 +28,12 @@ spec:
           runAsUser: 0    # root
         env:
         - name: JENKINS_OPTS
-          valueFrom:
-            secretKeyRef:
-              name: jenkins
-              key: options
+          value: --httpPort=80
+        # - name: JENKINS_OPTS
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name: jenkins
+        #       key: options
         volumeMounts:
         - mountPath: /var/jenkins_home
           name: jenkins-home
