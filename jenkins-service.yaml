@@ -3,7 +3,6 @@
   apiVersion: v1
   metadata:
     name: jenkins-ui
-    namespace: jenkins
   spec:
     clusterIP: 10.123.255.241
     type: NodePort
@@ -24,7 +23,6 @@
   apiVersion: v1
   metadata:
     name: jenkins-discovery
-    namespace: jenkins
   spec:
     clusterIP: 10.123.251.130
     selector:

@@ -2,7 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: jenkins
-  namespace: jenkins
 spec:
   replicas: 1
   template:
@@ -12,7 +11,7 @@ spec:
     spec:
       containers:
       - name: master
-        image: jenkins:2.7.4
+        image: jenkins:2.46.1
         ports:
         - containerPort: 80
         - containerPort: 50000

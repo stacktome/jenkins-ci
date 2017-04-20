@@ -3,7 +3,6 @@ kind: PersistentVolume
 apiVersion: v1
 metadata:
   name: jenkins-home-volume
-  namespace: jenkins
   labels:
     name: jenkins-home-volume
 spec:

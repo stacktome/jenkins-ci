@@ -3,7 +3,6 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: jenkins-home-claim
-  namespace: jenkins
 spec:
   accessModes:
     - ReadWriteOnce
