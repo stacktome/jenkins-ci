@@ -39,7 +39,7 @@ To get password for the ui, run:
 kubectl exec <pod name> --namespace jenkins -- cat /var/jenkins_home/secrets/initialAdminPassword
 ```
 
-Make sure to "enable proxy compatibility" in Manage Jenkins → Configure Global Security → Crumbs Algortithm
+Make sure to "enable proxy compatibility" in Manage Jenkins → Configure Global Security → Crumbs Algortithm (first check "Prevent Cross Site Request Forgery exploits")
 
 Install and configure Kubernetes plugin
 https://cloud.google.com/solutions/configuring-jenkins-container-engine

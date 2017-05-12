@@ -2,7 +2,8 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: jenkins-ui-ingress
-  namespace: jenkins
+  annotations:
+    kubernetes.io/ingress.allow-http: "false"
 spec:
   backend:
     serviceName: jenkins-ui
