@@ -1,0 +1,104 @@
+podTemplate(label: 'fuzzy-web-frontend', containers: [
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave-frontend', resourceRequestCpu: '100m', resourceRequestMemory: '50Mi'),
+    containerTemplate(name: 'nodejs', image: "eu.gcr.io/fuzzylabs-1314/ng-cli:$ANGULAR_CLI_VERSION", ttyEnabled: true, command: 'cat', resourceRequestCpu: '100m', resourceRequestMemory: '50Mi'),
+    containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat', resourceRequestCpu: '100m', resourceRequestMemory: '50Mi')
+  ], volumes: [
+    emptyDirVolume(mountPath: '/tmp/shared', memory: false),
+    hostPathVolume(mountPath: '/home/jenkins/npm-cache', hostPath: '/tmp'),
+    hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker'),
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+  ]
+) {
+    slackSend color: 'good', message: "Build scheduled: ${env.BUILD_URL} (branch=$BRANCH)"
+    
+    node ('fuzzy-web-frontend') {
+         
+        try {
+            stage ('Get code') {
+                git url: 'git@github.com:fuzzylabs/fuzzy-web-frontend.git', branch: '$BRANCH'
+                sh "git show -s --format=%H > /tmp/shared/commit-digest"
+            }
+
+            container('nodejs') {
+                stage ('Prepare npm cache') {
+                    // sh 'mkdir /home/jenkins/npm-cache/ng-cli/node_modules -p'
+                    sh 'mkdir /home/jenkins/npm-cache/node_modules -p'
+                    // sh 'mkdir ~/.npm/_cacache/ -p'
+                    sh 'mkdir node_modules -p'
+                    // sh 'mkdir /home/jenkins/npm-cache/ng-cli-cache/ -p'
+                    // sh "git show -s --format=%H > /home/jenkins/npm-cache/ng-cli/commit-digest"
+                    // sh "git show -s --format=%H > /home/jenkins/npm-cache/ng-cli-cache/commit-digest"
+                    sh "git show -s --format=%H > /home/jenkins/npm-cache/node_modules/commit-digest"
+                    if ("$CLEAR_CACHE" == "YES") {
+                        sh 'rm -r /home/jenkins/npm-cache/node_modules/*'
+                        sh "git show -s --format=%H > /home/jenkins/npm-cache/node_modules/commit-digest"
+                    }
+                    // sh 'cp -r /home/jenkins/npm-cache/ng-cli/* /usr/local/lib/'
+                    // sh 'cp -r /home/jenkins/npm-cache/ng-cli-cache/* ~/.npm/_cacache/'
+                    sh 'cp -r /home/jenkins/npm-cache/node_modules/* node_modules'
+                }
+                
+                // stage ('Upgrade @angular/cli') {
+                //     sh 'npm upgrade @angular/cli -g'
+                // }
+         
+                stage ('Install npm dependencies') {
+                    if ("$NPM_INSTALL" == "YES") {
+                        sh 'npm i'
+                    }
+                    // sh 'mkdir /home/jenkins/npm-cache/fuzzy-web-frontend -p'
+                    // sh 'find ./* -not -name "node_modules" -exec rm -rf {} +'
+                    // sh 'ls  /home/jenkins/npm-cache/ng-cli'
+                    // sh 'ls && ls node_modules && npm -v && node -v'
+                    // sh 'cd /home/jenkins/npm-cache/fuzzy-web-frontend && npm i'
+                    // sh 'ls && ls node_modules && npm -v && node -v'
+                    // sh 'npm upgrade'
+                }
+                
+                stage ('Generate http-client') {
+                    if ("$GENERATE_HTTP_CLIENT" == "YES") {
+                        sh "node swagger.js"
+                    }
+                } 
+                
+                stage ('Build project with angular cli') {
+                    sh 'ng build -e=prod -aot --build-optimizer -showCircularDependencies=false'
+                }
+                
+                stage ('Save cache to disk') {
+                    // sh 'cp -r /usr/local/lib/node_modules/* /home/jenkins/npm-cache/ng-cli/node_modules/'
+                    // sh 'cp -r ~/.npm/_cacache/* /home/jenkins/npm-cache/ng-cli-cache/'
+                    sh 'cp -r node_modules/* /home/jenkins/npm-cache/node_modules/'
+                }
+             }
+             
+            container('cloud-sdk') {
+                stage ('Build image') {
+                    sh "docker build -t eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:v1 ."
+                }
+                
+                stage ('Push docker image to registry') {
+                    sh "docker tag eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:v1 eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:`cat /tmp/shared/commit-digest`"
+                    sh "docker tag eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:v1 eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:latest"
+                    sh "gcloud docker -- push eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:v1"
+                    sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:latest'
+                    sh 'gcloud docker -- push eu.gcr.io/fuzzylabs-1314/fuzzy-web-frontend:`cat /tmp/shared/commit-digest`'
+                    sh 'gcloud config set compute/zone europe-west1-d'
+                    sh 'gcloud container clusters get-credentials airflow'
+                }
+                 
+                stage ('Deploy to production') {
+                    sh "sed -i \"s/fuzzy-web-frontend:latest/fuzzy-web-frontend:`cat /tmp/shared/commit-digest`/g\" k8s/deployment.yaml"
+                    sh 'kubectl replace -f k8s/deployment.yaml --record'
+                    sh 'kubectl rollout status deployment/fuzzy-web-frontend'
+                 }   
+            } 
+         
+        } catch(exc) {
+            slackSend color: 'danger', message: "Build failed: ${env.BUILD_URL}"
+            throw exc
+        }
+        
+        slackSend color: 'good', message: "Build completed: ${env.BUILD_URL}"
+    }
+}
