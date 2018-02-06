@@ -4,29 +4,23 @@
   metadata:
     name: jenkins-ui
   spec:
-    clusterIP: 10.123.255.241
     type: NodePort
-    # type: LoadBalancer
     selector:
-      app: master
+      app: jenkins
     ports:
       - protocol: TCP
         port: 80
         targetPort: 80
+        nodePort: 30000
         name: ui
-      - protocol: TCP
-        port: 8000
-        targetPort: 8000
-        name: webhooks
 ---
   kind: Service
   apiVersion: v1
   metadata:
     name: jenkins-discovery
   spec:
-    clusterIP: 10.123.251.130
     selector:
-      app: master
+      app: jenkins
     ports:
       - protocol: TCP
         port: 50000

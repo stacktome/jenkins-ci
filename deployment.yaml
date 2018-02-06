@@ -7,10 +7,10 @@ spec:
   template:
     metadata:
       labels:
-        app: master
+        app: jenkins
     spec:
       containers:
-      - name: master
+      - name: jenkins
         image: jenkins:2.46.1
         ports:
         - containerPort: 80
@@ -35,7 +35,7 @@ spec:
         #       key: options
         volumeMounts:
         - mountPath: /var/jenkins_home
-          name: jenkins-home
+          name: jenkins-volume
         resources:
           limits:
             cpu: 500m
@@ -43,11 +43,8 @@ spec:
           requests:
             cpu: 500m
             memory: 1500Mi
-      - name: webhooks
-        image: gcr.io/fuzzylabs-1314/webhooks:latest
-        ports:
-        - containerPort: 8000
       volumes:
-        - name: jenkins-home
-          persistentVolumeClaim:
-            claimName: jenkins-home-claim
+      - name: jenkins-volume
+        gcePersistentDisk:
+          pdName: jenkins-volume
+          fsType: ext4

@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: webdriver-manager
+  labels:
+    app: webdriver-manager
+spec:
+  template:
+    metadata:
+      labels:
+        app: webdriver-manager
+    spec:
+      containers:
+      - name: webdriver-manager
+        image: eu.gcr.io/fuzzylabs-1314/webdriver-manager:latest
+        ports:
+        - containerPort: 4444
+          hostPort: 4444
+        volumeMounts:
+          - mountPath: /tmp/webdriver-shared
+            name: shared-volume
+      volumes:
+      - name: shared-volume
+        hostPath:
+          path: /tmp/webdriver-shared
