@@ -1,0 +1,38 @@
+podTemplate(label: 'ng-cli', containers: [
+    containerTemplate(name: 'jnlp', image: 'gcr.io/fuzzylabs-1314/jnlp-slave-frontend', resourceRequestCpu: '100m', resourceRequestMemory: '50Mi'),
+    containerTemplate(name: 'cloud-sdk', image: 'google/cloud-sdk', ttyEnabled: true, command: 'cat', resourceRequestCpu: '100m', resourceRequestMemory: '50Mi')
+  ], volumes: [
+    emptyDirVolume(mountPath: '/tmp/shared', memory: false),
+    hostPathVolume(mountPath: '/usr/bin/docker', hostPath: '/usr/bin/docker'),
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock')
+  ]
+) {
+    slackSend color: 'good', message: "Build scheduled: ${env.BUILD_URL} (branch=$BRANCH)"
+    
+    node ('ng-cli') {
+         
+        try {
+            stage ('Get code') {
+                git url: 'git@github.com:fuzzylabs/fuzzy-web-frontend.git', branch: '$BRANCH'
+            }
+            
+            container('cloud-sdk') {
+                stage ('Build image') {
+                    sh "docker pull node:latest"
+                    sh "sed -i -e 's/ANGULAR_VERSION/$ANGULAR_CLI_VERSION/g' angular-cli-Dockerfile"
+                    sh "docker build -f angular-cli-Dockerfile -t eu.gcr.io/fuzzylabs-1314/ng-cli:$ANGULAR_CLI_VERSION ."
+                }
+                    
+                stage ('Push docker image to registry') {
+                    sh "gcloud docker -- push eu.gcr.io/fuzzylabs-1314/ng-cli:$ANGULAR_CLI_VERSION"
+                }
+            }
+         
+        } catch(exc) {
+            slackSend color: 'danger', message: "Build failed: ${env.BUILD_URL}"
+            throw exc
+        }
+        
+        slackSend color: 'good', message: "Build completed: ${env.BUILD_URL}"
+    }
+}
