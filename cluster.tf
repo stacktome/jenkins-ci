@@ -69,7 +69,6 @@ resource "google_compute_backend_service" "jenkins" {
     group = "${google_container_cluster.jenkins.instance_group_urls.0}"
     balancing_mode = "RATE"
     max_rate_per_instance = 1
-    ports = ["30001"]
   }
 
   iap {
@@ -142,7 +141,6 @@ resource "google_compute_backend_service" "nexus" {
     group = "${google_container_cluster.jenkins.instance_group_urls.0}"
     balancing_mode = "RATE"
     max_rate_per_instance = 1
-    ports = ["30001"]
   }
 
   health_checks = ["${google_compute_health_check.nexus.self_link}"]
