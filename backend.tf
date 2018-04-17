@@ -1,7 +1,7 @@
 terraform {
  backend "gcs" {
    bucket = "stacktome-prod"
-   path = "/jenkins/"
+   path = "jenkins/terraform.tfstate"
  }
 }
 
