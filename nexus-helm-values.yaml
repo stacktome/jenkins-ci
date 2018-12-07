@@ -20,7 +20,7 @@ service:
     periodSeconds: 30
     failureThreshold: 6
   livenessProbe:
-    initialDelaySeconds: 30
+    initialDelaySeconds: 300
     periodSeconds: 30
   annotations: {}
   # foo.io/bar: "true"
