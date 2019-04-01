@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: jenkins
-        image: jenkins:2.46.1
+        image: jenkins/jenkins:2.164.1
         ports:
         - containerPort: 80
         - containerPort: 50000
