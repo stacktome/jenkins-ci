@@ -9,9 +9,19 @@ spec:
       labels:
         app: jenkins
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - sonatype-nexus
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: jenkins
-        image: jenkins/jenkins:2.164.2
+        image: jenkins/jenkins:2.176.1
         ports:
         - containerPort: 80
         - containerPort: 50000
