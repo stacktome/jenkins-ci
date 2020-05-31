@@ -15,6 +15,7 @@ ARG VERSION
 ENV BASE_URL="https://get.helm.sh"
 ENV TAR_FILE="helm-v${VERSION}-linux-amd64.tar.gz"
 
+RUN gcloud components install kubectl
 RUN apk add --update --no-cache curl ca-certificates && \
     curl -L ${BASE_URL}/${TAR_FILE} |tar xvz && \
     mv linux-amd64/helm /usr/bin/helm && \
@@ -23,7 +24,3 @@ RUN apk add --update --no-cache curl ca-certificates && \
     apk del curl && \
     rm -f /var/cache/apk/*
 
-WORKDIR /apps
-
-ENTRYPOINT ["helm"]
-CMD ["--help"]
