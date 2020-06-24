@@ -24,7 +24,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: jenkins
-        image: jenkins/jenkins:2.222.1
+        image: jenkins/jenkins:2.235.1
         ports:
         - containerPort: 80
         - containerPort: 50000
