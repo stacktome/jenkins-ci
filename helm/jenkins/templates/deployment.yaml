@@ -4,6 +4,11 @@ metadata:
   name: jenkins
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: jenkins
@@ -12,19 +17,22 @@ spec:
       labels:
         app: jenkins
     spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: jenkins
+      serviceAccountName: jenkins
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
           - labelSelector:
               matchExpressions:
-              - key: app
+              - key: "app.kubernetes.io/instance"
                 operator: In
                 values:
-                - sonatype-nexus
+                - nexus
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: jenkins
-        image: jenkins/jenkins:2.235.1
+        image: jenkins/jenkins:2.235.5
         ports:
         - containerPort: 80
         - containerPort: 50000
@@ -41,23 +49,23 @@ spec:
         env:
         - name: JENKINS_OPTS
           value: --httpPort=80
-        # - name: JENKINS_OPTS
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name: jenkins
-        #       key: options
         volumeMounts:
         - mountPath: /var/jenkins_home
           name: jenkins-volume
         resources:
-          limits:
-            cpu: 500m
-            memory: 1500Mi
+#          limits:
+#            cpu: 500m
+#            memory: 1Gi
           requests:
             cpu: 500m
-            memory: 1500Mi
+            memory: 1Gi
       volumes:
       - name: jenkins-volume
         gcePersistentDisk:
-          pdName: jenkins-volume
+          pdName: jenkins-production-volume
           fsType: ext4
+      tolerations:
+        - effect: NoSchedule
+          key: jenkins
+          operator: Equal
+          value: "true"
