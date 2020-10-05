@@ -29,7 +29,7 @@ nexus:
       ##   MaxRAMFraction=1 is not being set as it would allow the heap
       ##     to use all the available memory.
       cpu: 250m
-      memory: 4800Mi
+      memory: 4000Mi
   # The ports should only be changed if the nexus image uses a different port
   dockerPort: 18443
   nexusPort: 8081
