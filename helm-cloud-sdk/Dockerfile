@@ -1,14 +1,7 @@
 FROM google/cloud-sdk:alpine
 
-## Helm 2
-# RUN curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
-# RUN helm init -c
-
-
-## Helm 3
-
 # variable "HELM_VERSION" must be passed as docker environment variables during the image build
-# docker build --no-cache --build-arg HELM_VERSION=3.2.1 -t eu.gcr.io/stacktome-prod/helm-cloud-sdk:latest .
+# docker build --no-cache --build-arg HELM_VERSION=3.5.2 -t eu.gcr.io/stacktome-prod/helm-cloud-sdk:latest .
 ARG HELM_VERSION
 
 
@@ -16,7 +9,7 @@ ENV BASE_URL="https://get.helm.sh"
 ENV TAR_FILE="helm-v${HELM_VERSION}-linux-amd64.tar.gz"
 
 RUN gcloud components install kubectl
-RUN apk add --update --no-cache python curl ca-certificates && \
+RUN set -eux && apk add --update --no-cache python3 curl ca-certificates && \
     curl -L ${BASE_URL}/${TAR_FILE} |tar xvz && \
     mv linux-amd64/helm /usr/bin/helm && \
     chmod +x /usr/bin/helm && \
