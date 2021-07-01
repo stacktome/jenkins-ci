@@ -32,7 +32,7 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: jenkins
-        image: jenkins/jenkins:{{ .Values.imageTag }}
+        image: "jenkins/jenkins:{{ .Values.imageTag }}"
         ports:
         - containerPort: 80
         - containerPort: 50000
