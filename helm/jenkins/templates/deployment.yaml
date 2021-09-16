@@ -50,12 +50,9 @@ spec:
         - name: JENKINS_OPTS
           value: --httpPort=80
         volumeMounts:
-        - mountPath: /var/jenkins_home
-          name: jenkins-volume
+        - name: jenkins-volume
+          mountPath: /var/jenkins_home
         resources:
-#          limits:
-#            cpu: 500m
-#            memory: 1Gi
           requests:
             cpu: 500m
             memory: 1Gi
