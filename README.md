@@ -1,3 +1,6 @@
+THIS README IS LEGACY; check helm/README.md
+
+
 Build Infrastructure
 ====================
 

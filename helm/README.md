@@ -1,4 +1,4 @@
-###NEXUS OOS Helm v3 installation
+###NEXUS OOS and Jenkins Helm v3 installation
 
 ```
 helm repo add sonatype https://sonatype.github.io/helm3-charts/
