@@ -4,7 +4,7 @@ app:
 
 image:
   repository: jenkins/jenkins
-  tag: "2.443-jdk21"
+  tag: "2.450-jdk21"
   digest: ""
   pullPolicy: Always
 
@@ -16,8 +16,6 @@ rbac:
       verbs: ["*"]
 
 server:
-  local: true
-
   replicaCount: 1
 
   securityContext:
@@ -42,7 +40,7 @@ server:
       effect: NoSchedule
 
   nodeSelector:
-     cloud.google.com/gke-nodepool: "jenkins-pool"
+     pool-designation: "jenkins-pool"
 
   persistentVolume:
     enabled: true
@@ -52,7 +50,7 @@ server:
     accessMode:     
       - ReadWriteOnce
 
-    storageSize: "5Gi"
+    storageSize: "40Gi"
 
     labels: {}
     annotations: {}
