@@ -1,74 +1,46 @@
 # Table of Contents <!-- omit in toc -->
-<div id="user-content-toc">
-  <ul>
-    <li><a href="#deploy-to-kubernetes">Deploy to Kubernetes</a></li>
-    <li>
-        <a href="#github">GitHub</a>
-        <ul>
-        <li>
-            <a href="#authenticate-with-github-app">Authenticate with GitHub App</a>
-            <ul>
-                <li><a href="#create-github-app">Create Github App</a></li>
-                <li><a href="#generate-private-key-for-auth-to-the-github-app">Generate private key for auth to the GitHub App</a></li>
-                <li><a href="#install-app-to-your-org">Install App to your orgs</a></li>
-                <li><a href="#add-app-creds-to-jenkins">Add App creds to Jenkins</a></li>
-                <li><a href="#access-github-repos-from-pipeline">Access GitHub Repos from Pipeline</a></li>
-            </ul>
-        </li>
-        </ul>
-    </li>
-    <li>
-        <a href="#mulitbracnh-pipeline">Mulitbracnh pipeline</a>
-        <ul>
-            <li><a href="#create-multibranch-pipeline-for-github-private-repo">Create Multibranch pipeline for GitHub private repo</a></li>
-        </ul>
-    </li>
-    <li>
-        <a href="#environment">Evironment</a>
-        <ul>
-            <li><a href="#add-global-env-variables">Add global env variables</a></li>
-            <li><a href="#set-env-variables-in-pipeline">Set env variables in Pipeline</a></li>
-        </ul>
-    </li>
-    <li>
-        <a href="#gcp">GCP</a>
-        <ul>
-            <li><a href="#bind-k8s-service-acc-to-gcp-service-acc">Bind K8s service acc to GCP service acc</a></li>
-        </ul>
-    </li>
-  </ul>
-</div>
+- [Deploy to Kubernetes](#deploy-to-kubernetes) 
+- [GitHub](#github)
+  - [Authenticate with GitHub App](#authenticate-with-github-app)
+    - [Create Github App](#create-github-app)
+    - [Generate private key for auth to the GitHub App](#generate-private-key-for-auth-to-the-github-app)
+    - [Install App to your org](#install-app-to-your-org)
+    - [Access GitHub Repos from Pipeline](#access-github-repos-from-pipeline)
+- [Mulitbracnh pipeline](#mulitbracnh-pipeline)
+  - [Create Multibranch pipeline for GitHub private repo](#create-multibranch-pipeline-for-github-private-repo)
+- [Environment](#environment)
+  - [Add global env variables](#add-global-env-variables)
+  - [Set env variables in Pipeline](#set-env-variables-in-pipeline)
+- [GCP](#gcp)
+  -[Bind K8s service acc to GCP service acc](#bind-k8s-service-acc-to-gcp-service-acc)
 
-## Deploy to Kubernetes
+# Deploy to Kubernetes
 Use the Helm Chart from the repo
 ```sh
 helm upgrade --install jenkins ./helm/ -f ./helm/vars.yaml --namespace=jenkins-ci
 ```
 
-## GitHub
-### Authenticate with GitHub App
+# GitHub
+## Authenticate with GitHub App
 So let's do this step by step starting from scratch
 
-#### Create Github App
+### Create Github App
 For first you need to crete GitHub App. Open "Your organizations" page on GitHub and select Settings for org. From there go to Developer Settings -> GitHub App -> New GitHub App.
-<div>
-    <video 
-        width="600" 
-        height="400" 
-        controls 
-        src="https://www.dropbox.com/scl/fi/ytvxu6fefeuvsbfou1gve/01.mp4?rlkey=jim10uiyiap7su2kcz0uk2oyw&dl=0"
-        style="margin-top: -20px; margin-bottom: 10px">
-    </video>
-</div> 
+
+
+
+https://github.com/stacktome/jenkins-ci/assets/96535499/f105a602-6ce4-41c5-a425-fa8c93e7ff45
+
+
+
 Perform next actions:
-<div>
-    <video 
-        width="600" 
-        height="400" 
-        controls src="https://www.dropbox.com/scl/fi/a1x559gi0z5kpuzcv2cd2/02.mp4?rlkey=wiyaqxfaajim7u3o6bo0lbaie&dl=0"
-        style="margin-top: -20px; margin-bottom: 10px">
-    </video>
-</div>
+
+
+
+
+https://github.com/stacktome/jenkins-ci/assets/96535499/6fa0fd9e-75c1-4a16-aa2d-dd266a149003
+
+
 
 - Fill the "App Name" and "Description" fields
 - Put your org url on GitHub the "Homepage URL" field
@@ -91,39 +63,39 @@ Perform next actions:
 - Click "Create GitHub App" Button 
 
 
-#### Generate private key for auth to the GitHub App
+### Generate private key for auth to the GitHub App
 Go again to the GitHub Apps in your org "Developer Settings" and press "Edit" on created app. Under Private keys, select "Generate a private key" and download the key
-<div>
-    <video 
-        width="600" 
-        height="400" 
-        controls src="https://www.dropbox.com/scl/fi/p4twk94azhewuexxql70i/03.mp4?rlkey=oh5wjj095gbrmjmdh1fqh076h&raw=1"
-        style="margin-top: -20px; margin-bottom: 10px">
-    </video>
-</div>
-Convert key to acceptible for Jenkins format:```openssl pkcs8 -topk8 -inform PEM -outform PEM -in github-key.pem -out converted-github-key.pem -nocrypt```
-<div>
-    <video 
-        width="600" 
-        height="400" 
-        controls src="https://www.dropbox.com/scl/fi/zxv25hk0h83hqeoyu6v85/04.mp4?rlkey=so0flwicfy3ncd8ul3ik3j7ht&raw=1"
-        style="margin-top: -7px; margin-bottom: 10px">
-    </video>
-</div>
 
-#### Install App to your org
+
+
+https://github.com/stacktome/jenkins-ci/assets/96535499/ec8f64bd-395b-463e-abb8-a5b541c16558
+
+
+
+Convert key to acceptible for Jenkins format:
+```sh
+openssl pkcs8 -topk8 -inform PEM -outform PEM -in github-key.pem -out converted-github-key.pem -nocrypt
+```
+
+
+
+
+https://github.com/stacktome/jenkins-ci/assets/96535499/2123551d-39d0-43ae-ae08-56d4c2ca12a5
+
+
+
+### Install App to your org
 Now it's time to install app to your org. Last time, navigate to the "Edit" page for your GitHub App and choose "Install app" in the sidebar menu.
 Then Select organiztion where you wish to install App and org repos to which you grant permissions:
-<div>
-    <video 
-        width="600" 
-        height="400" 
-        controls src="https://www.dropbox.com/scl/fi/mwrpynn7pprl135u4vr4h/05.mp4?rlkey=gcmrjrj5jmm0ez5jk5wuc48b2&raw=1"
-        style="margin-top: -20px; margin-bottom: 10px">
-    </video>
-</div>
 
-#### Add App creds to Jenkins
+
+
+
+https://github.com/stacktome/jenkins-ci/assets/96535499/3547068f-993b-4a45-935f-2bfa60ec3e45
+
+
+
+### Add App creds to Jenkins
 The final counter is to save app creds to the Jenkins instance.
 - Login to Jenkins
 - Go to "Manage Jenkins" -> "Credentials" -> "Global"
@@ -191,33 +163,41 @@ pipeline {
 }
 ```
 
-## Mulitbracnh pipeline
+# Mulitbracnh pipeline
 Jenkins Multibranch Pipeline is quite straitforward. It is a folder of Jobs which are defined in one repo but on different branches. 
 So if you branch has a Jenkinsfile with pipeline script, Jenkins will automatically recognize it and create separate Job. 
 
-### Create Multibranch pipeline for GitHub private repo
+## Create Multibranch pipeline for GitHub private repo
 
-- Login to Jenkins and nn Dasboard click "Add New Item" button 
+- Login to Jenkins and nn Dasboard click "Add New Item" button <br>
 <img src='./img/multibranch/01.png' width=70% style="margin: 17px">
-- Choose "Multibranch Pipeline" and enter a name for it <br>
+
+- Choose "Multibranch Pipeline" and enter a name for it
 <img src='./img/multibranch/02.png' width=70% style="margin: 17px">
+
 - Fill the "Display name" and "Descriptions" fields if you want to
 <img src='./img/multibranch/03.png' width=70% style="margin: 17px">
+
 - In "Branch Sources" select GitHub <br>
 <img src='./img/multibranch/04.png' width=70% style="margin: 17px">
+
 - Choose existing GitHub App private key as a creds <br>
 <img src='./img/multibranch/05.png' width=70% style="margin: 17px">
+
 - Specify your repo URL <br>
 <img src='./img/multibranch/06.png' width=70% style="margin: 17px">
+
 - Adjust other options by your current needs <br>
 <img src='./img/multibranch/07.png' width=70% style="margin: 17px">
+
 - Leave "Build Configuration" unchanged <br>
 <img src='./img/multibranch/08.png' width=70% style="margin: 17px">
+
 - Save. If you didn't mess up, folder with your Pipelines should appear on Dashboard <br>
 <img src='./img/multibranch/09.png' width=70% style="margin: 17px">
 
 # Environment
-### Add global env variables
+## Add global env variables
 From Jenkins Dashboard go to the Manage Jenkins an then to the System. Scroll down to Global Properties. Check the Environment Variables box. 
 Add key and value for env and save. Now you can use your env variable in all Pipelines like this:
 ```groovy
@@ -241,7 +221,7 @@ pipeline {
 }
 ```
 
-### Set env variables in Pipeline 
+## Set env variables in Pipeline 
 You can define env vars specific to Pipeline using environment block:
 ```groovy
 pipeline {
@@ -271,7 +251,7 @@ pipeline {
 
 
 # GCP
-### Bind K8s service acc to GCP service acc
+## Bind K8s service acc to GCP service acc
 Enable Workload Identity Federation for existing cluster: 
 ```sh
 gcloud container clusters update <cluster> \
