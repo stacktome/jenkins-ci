@@ -65,7 +65,7 @@ Perform next actions:
     <video 
         width="600" 
         height="400" 
-        controls src="https://www.dropbox.com/scl/fi/a1x559gi0z5kpuzcv2cd2/02.mp4?rlkey=wiyaqxfaajim7u3o6bo0lbaie&raw=1"
+        controls src="https://www.dropbox.com/scl/fi/a1x559gi0z5kpuzcv2cd2/02.mp4?rlkey=wiyaqxfaajim7u3o6bo0lbaie"
         style="margin-top: -20px; margin-bottom: 10px">
     </video>
 </div>
