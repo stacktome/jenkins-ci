@@ -1,0 +1,18 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "jenkins.RoleBinding" . }}
+  namespace: {{ template "jenkins.namespace" . }}
+  annotations: 
+    {{- include "jenkins.commonAnnotations" . | nindent 4 }}
+  labels:
+    {{- include "jenkins.commonLabels" . | nindent 4 }}
+roleRef:
+  kind: Role
+  name: {{ template "jenkins.Role" . }}
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name:  {{ template "jenkins.serviceAccountName" . }}
+  namespace: {{ template "jenkins.namespace" . }}
+

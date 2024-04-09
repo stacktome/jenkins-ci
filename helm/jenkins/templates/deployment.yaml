@@ -1,68 +1,72 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: jenkins
+  name: {{ template "jenkins.name" . }}
+  namespace: {{ template "jenkins.namespace" . }}
+  annotations: 
+    {{- include "jenkins.commonAnnotations" . | nindent 4 }}
+  labels:
+    {{- include "jenkins.commonLabels" . | nindent 4 }}
 spec:
-  replicas: 1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 1
+  replicas: {{ .Values.server.replicasCount | default 1 }}
   selector:
     matchLabels:
-      app: jenkins
+    {{- include "jenkins.server.selectorLabels" . | indent 6 }}
   template:
     metadata:
       labels:
-        app: jenkins
+      {{- include "jenkins.server.selectorLabels" . | indent 8 }}
     spec:
-      nodeSelector:
-        cloud.google.com/gke-nodepool: jenkins
-      serviceAccountName: jenkins
-      affinity:
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: "app.kubernetes.io/instance"
-                operator: In
-                values:
-                - nexus
-            topologyKey: "kubernetes.io/hostname"
+      securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+      serviceAccountName: {{ include "jenkins.serviceAccountName" . }}
       containers:
-      - name: jenkins
-        image: "jenkins/jenkins:{{ .Values.imageTag }}"
-        ports:
-        - containerPort: 80
-        - containerPort: 50000
-        readinessProbe:
-          httpGet:
-            path: /login
-            port: 80
-          periodSeconds: 10
-          timeoutSeconds: 5
-          successThreshold: 2
-          failureThreshold: 5
-        securityContext:
-          runAsUser: 0    # root
-        env:
-        - name: JENKINS_OPTS
-          value: --httpPort=80
-        volumeMounts:
-        - name: jenkins-volume
-          mountPath: /var/jenkins_home
-        resources:
-          requests:
-            cpu: 500m
-            memory: 1Gi
-      volumes:
-      - name: jenkins-volume
-        gcePersistentDisk:
-          pdName: jenkins-production-volume
-          fsType: ext4
+        - name: {{ template "jenkins.name" . }}
+          image: {{ template "jenkins.getImage" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" | quote }}
+          {{- with .Values.server.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: httpport
+              containerPort: 8080
+            - name: jnlpport
+              containerPort: 50000
+          livenessProbe:
+            httpGet:
+              path: "/login"
+              port: 8080
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: "/login"
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: jenkins-storage
+              mountPath: /var/jenkins_home
+      {{- with .Values.server.tolerations }}
       tolerations:
-        - effect: NoSchedule
-          key: jenkins
-          operator: Equal
-          value: "true"
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: jenkins-storage
+          {{- if .Values.server.persistentVolume.enabled }}
+          persistentVolumeClaim:
+              claimName: {{ ternary .Values.server.persistentVolume.existingClaim (include "jenkins.claim" .) false}}
+          {{ else }}
+          emptyDir:
+            sizeLimit: "2Gi"
+          {{- end -}}

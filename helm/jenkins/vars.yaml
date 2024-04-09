@@ -1,0 +1,67 @@
+app:
+  name: jenkins
+  namespace: jenkins-ci
+
+image:
+  repository: jenkins/jenkins
+  tag: "2.450-jdk21"
+  digest: ""
+  pullPolicy: Always
+
+rbac:
+  serviceAccountName: jenkins-admin
+  rules: 
+    - apiGroups: [""]
+      resources: ["*"]
+      verbs: ["*"]
+
+server:
+  replicaCount: 1
+
+  securityContext:
+    fsGroup: 1000
+    runAsUser: 1000
+
+  resources:
+    limits: 
+      memory: "2Gi"
+    requests:
+      memory: "2Gi"
+      cpu: "1000m"
+
+  labels: {}
+  annotations: {}
+
+  tolerations:
+    - key: jenkins
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+
+  nodeSelector:
+     pool-designation: "jenkins-pool"
+
+  persistentVolume:
+    enabled: true
+
+    storageClass: "standard"
+
+    accessMode:     
+      - ReadWriteOnce
+
+    storageSize: "40Gi"
+
+    labels: {}
+    annotations: {}
+
+    # existingClaim: ""
+    # existingVolume: ""
+
+    selector: {}
+
+  service: 
+    type: NodePort
+    port: 8080
+    nodePort: 32000
+
+
