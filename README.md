@@ -56,7 +56,7 @@ For first you need to crete GitHub App. Open "Your organizations" page on GitHub
         width="600" 
         height="400" 
         controls 
-        src="https://www.dropbox.com/scl/fi/ytvxu6fefeuvsbfou1gve/01.mp4?rlkey=jim10uiyiap7su2kcz0uk2oyw&raw=1"
+        src="https://www.dropbox.com/scl/fi/ytvxu6fefeuvsbfou1gve/01.mp4?rlkey=jim10uiyiap7su2kcz0uk2oyw&dl=1"
         style="margin-top: -20px; margin-bottom: 10px">
     </video>
 </div> 
@@ -65,7 +65,7 @@ Perform next actions:
     <video 
         width="600" 
         height="400" 
-        controls src="https://www.dropbox.com/scl/fi/a1x559gi0z5kpuzcv2cd2/02.mp4?rlkey=wiyaqxfaajim7u3o6bo0lbaie"
+        controls src="https://www.dropbox.com/scl/fi/a1x559gi0z5kpuzcv2cd2/02.mp4?rlkey=wiyaqxfaajim7u3o6bo0lbaie&dl=1"
         style="margin-top: -20px; margin-bottom: 10px">
     </video>
 </div>
