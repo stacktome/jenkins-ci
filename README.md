@@ -12,7 +12,7 @@
   - [Add global env variables](#add-global-env-variables)
   - [Set env variables in Pipeline](#set-env-variables-in-pipeline)
 - [GCP](#gcp)
-  -[Bind K8s service acc to GCP service acc](#bind-k8s-service-acc-to-gcp-service-acc)
+  - [Bind K8s service acc to GCP service acc](#bind-k8s-service-acc-to-gcp-service-acc)
 
 # Deploy to Kubernetes
 Use the Helm Chart from the repo
