@@ -25,9 +25,8 @@ server:
   resources:
     limits: 
       memory: "2Gi"
-      cpu: "1000m"
     requests:
-      memory: "1Gi"
+      memory: "2Gi"
       cpu: "1000m"
 
   labels: {}
