@@ -197,7 +197,7 @@ So if you branch has a Jenkinsfile with pipeline script, Jenkins will automatica
 
 ### Create Multibranch pipeline for GitHub private repo
 
-- Login to Jenkins and nn Dasboard click "Add New Item" button <br>
+- Login to Jenkins and nn Dasboard click "Add New Item" button 
 <img src='./img/multibranch/01.png' width=70% style="margin: 17px">
 - Choose "Multibranch Pipeline" and enter a name for it <br>
 <img src='./img/multibranch/02.png' width=70% style="margin: 17px">
