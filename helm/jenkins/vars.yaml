@@ -4,7 +4,7 @@ app:
 
 image:
   repository: jenkins/jenkins
-  tag: "2.450-jdk21"
+  tag: "2.488-jdk21"
   digest: ""
   pullPolicy: Always
 
